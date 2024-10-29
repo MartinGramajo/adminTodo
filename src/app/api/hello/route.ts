@@ -8,3 +8,12 @@ export async function GET(request: Request) {
     hola:'mundo',
   })
 }
+
+
+export async function POST(request: Request) { 
+
+    return NextResponse.json({
+      hola:'mundo',
+      method: 'POST',
+    })
+  }

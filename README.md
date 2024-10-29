@@ -32,3 +32,26 @@ export async function GET(request: Request) {
 ```
 
 Por ultimo probamos el endpoint en Postman: http://localhost:3000/api/hello
+
+### Agregar otra petición
+
+Para agregar otra petición simplemente tenemos que copiar el export de arriba y cambiarle el método en este caso vamos a poner de ejemplo con el método POST :
+
+```js
+// rag snippets para creación
+
+import { NextResponse, NextRequest } from "next/server";
+
+export async function GET(request: Request) {
+  return NextResponse.json({
+    hola: "mundo",
+  });
+}
+
+export async function POST(request: Request) {
+  return NextResponse.json({
+    hola: "mundo",
+    method: "POST",
+  });
+}
+```
