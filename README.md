@@ -68,13 +68,11 @@ Creamos en la raíz del proyecto el archivo _docker-compose.yml_ este archivo b�
 
 2. services: vamos a crear el servicio todosDB.
 
-
 > [!NOTA]
 >
 > los archivos .yml la tabulation es muy importante.
 >
 > NO USAR ESPACIOS.
-
 
 3. todosDB: configuramos la _image_ que descargamos con el comando => docker pull postgres:15.3
 
@@ -118,22 +116,21 @@ services:
 >
 > docker compose up -d : Este comando es para levantar la imagen, el -d significa detach que lo haga de manera desenlazada de la terminal.
 
-10. Por ultimo nos queda verificar que todo se ha creado perfectamente, para ello nos vamos a docker desktop, en la opción container 
+10. Por ultimo nos queda verificar que todo se ha creado perfectamente, para ello nos vamos a docker desktop, en la opción container
 
 ![This is an alt text.](https://res.cloudinary.com/dtbfspso5/image/upload/v1730170064/Captura_de_pantalla_2024-10-28_234717_tkc6zv.png "This is a sample image.")
 
-11. Nos vamos a tablePlus para probar la base de datos: 
- - Tocamos el + 
- - seleccionamos PostgreSQL 
- - definimos la conexión: configuramos la conexión 
- > [IMPORTANTE]
->
-> Aquí vamos a utilizar las variables de entorno tanto para el usuario como para el password que definimos en el punto 7.
->
+11. Nos vamos a tablePlus para probar la base de datos:
+
+- Tocamos el +
+- seleccionamos PostgreSQL
+- definimos la conexión: configuramos la conexión
+  > [IMPORTANTE]
+  >
+  > Aquí vamos a utilizar las variables de entorno tanto para el usuario como para el password que definimos en el punto 7.
 - Por ultimo pulsamos TEST y si nos sale todo en verde tenemos establecida nuestra conexión
 
 ![This is an alt text.](https://res.cloudinary.com/dtbfspso5/image/upload/v1730170374/Captura_de_pantalla_2024-10-28_235242_l5tk3c.png "This is a sample image.")
-
 
 ## Prisma + NextJs
 
@@ -141,33 +138,33 @@ Prisma se usa para facilitar la interacción con bases de datos SQL y no-SQL y s
 
 > [IMPORTANTE]
 >
-> Nos permite modelar o tener objects *evitando tener que hacer queries* como seleccionar tabla, insertar en tabla etc.
->
+> Nos permite modelar o tener objects _evitando tener que hacer queries_ como seleccionar tabla, insertar en tabla etc.
 
 [Prisma Documentación](https://www.prisma.io/docs/orm/overview/introduction/what-is-prisma)
 
 [Vercel Documentación: Para crear el prisma client (para trabajar con nuestro object, modelos que vamos a crear)](https://vercel.com/guides/nextjs-prisma-postgres)
 
-
 ## Conectar Prisma con Next
 
-* En la terminal vamos a ejecutar el siguiente comando: 
+- En la terminal vamos a ejecutar el siguiente comando:
+
 ```
  npx prisma init
 ```
 
-* Este comando nos crear el archivo .env con el database_url. En la cual tenemos que editar con nuestros datos.
+- Este comando nos crear el archivo .env con el database_url. En la cual tenemos que editar con nuestros datos.
 
-* Ejecutado el comando en la terminal nos da una serie de pasos: 
+- Ejecutado el comando en la terminal nos da una serie de pasos:
+
 1. En el archivo .env tenemos que establecer el DATABASE_URL o la variable de entorno de nuestra base.
-2. Establecer el *provider* de *datasource* para establecer un *scheman.prisma* esto nos habilita trabajar con: postgresql, mysql, SQLite, mongodb o cockroach db.  
+2. Establecer el _provider_ de _datasource_ para establecer un _scheman.prisma_ esto nos habilita trabajar con: postgresql, mysql, SQLite, mongodb o cockroach db.
 3. Ejecutar el comando : npx prisma db pull para convertir una base de datos en prisma.
-4. Ejecutar el comando: npx prisma generate  para generar el PRISMA CLIENT. 
+4. Ejecutar el comando: npx prisma generate para generar el PRISMA CLIENT.
 
-* Por otra parte, creamos un archivo copia del .env con el nombre  .env.template. Este archivo servirá de guía para la gente que se sume al proyecto o que quiera hacer las configuraciones base en caso de clonar nuestro repo. 
+- Por otra parte, creamos un archivo copia del .env con el nombre .env.template. Este archivo servirá de guía para la gente que se sume al proyecto o que quiera hacer las configuraciones base en caso de clonar nuestro repo.
 
-* Ahora vamos a trabajar en la carpeta *PRISMA* en el archivo *schema.prisma*: En este archivo vamos a definir los modelos con los cuales vamos a trabajar. 
-NOTA: un MODELO representa una tabla dentro de la base de datos.
+- Ahora vamos a trabajar en la carpeta _PRISMA_ en el archivo _schema.prisma_: En este archivo vamos a definir los modelos con los cuales vamos a trabajar.
+  NOTA: un MODELO representa una tabla dentro de la base de datos.
 
 ```js
 generator client {
@@ -188,14 +185,17 @@ model Todo {
 }
 
 ```
+
 Nota: @default() es para establecer el valor por defecto por ejemplo en la propiedad complete lo establecemos como false.
 
-* Como hicimos una modificación en la base de datos o en nuestra estructura de datos tenemos que ejecutar una migración. Esto se debe que al agregar el model Todo es nuestra primera modificación a la base de datos.
-Para ellos vamos a utilizar el siguiente comando: 
+- Como hicimos una modificación en la base de datos o en nuestra estructura de datos tenemos que ejecutar una migración. Esto se debe que al agregar el model Todo es nuestra primera modificación a la base de datos.
+  Para ellos vamos a utilizar el siguiente comando:
+
 ```
-npx prisma migrate dev 
+npx prisma migrate dev
 ```
-Nota: *dev* seria el nombre de nuestra migración. 
+
+Nota: _dev_ seria el nombre de nuestra migración.
 
 > [IMPORTANTE]
 >
@@ -203,27 +203,26 @@ Nota: *dev* seria el nombre de nuestra migración.
 >
 > NO OLVIDAR: CADA VEZ QUE HAGAMOS CAMBIOS TENEMOS QUE HACER LAS MIGRACIONES CORRESPONDIENTE.
 
-* Una vez terminado el proceso del comando, nos vamos a tablePlus y apretamos ctrl + R, Si todo lo hicimos correctamente vamos a poder ver lo siguiente:
-![TablePlus.](https://res.cloudinary.com/dtbfspso5/image/upload/v1730173074/Captura_de_pantalla_2024-10-29_003724_sek4c1.png)
+- Una vez terminado el proceso del comando, nos vamos a tablePlus y apretamos ctrl + R, Si todo lo hicimos correctamente vamos a poder ver lo siguiente:
+  ![TablePlus.](https://res.cloudinary.com/dtbfspso5/image/upload/v1730173074/Captura_de_pantalla_2024-10-29_003724_sek4c1.png)
 
+- Por ultimo vamos a ejecutar el comando para generar el CLIENTE DE PRISMA (PRISMA CLIENT) para poder hacer las manipulaciones de la base de datos.
 
-
-* Por ultimo vamos a ejecutar el comando para generar el CLIENTE DE PRISMA (PRISMA CLIENT) para poder hacer las manipulaciones de la base de datos. 
 ```
 npx prisma generate
 ```
 
-Importante seguir las recomendaciones que nos da el link de vercel: 
+Importante seguir las recomendaciones que nos da el link de vercel:
 [Vercel Documentación: Para crear el prisma client (para trabajar con nuestro object, modelos que vamos a crear)](https://vercel.com/guides/nextjs-prisma-postgres)
 
 Tenemos que crear una nueva carpeta dentro de SRC / LIB/ prisma.ts
 
-```js 
-import { PrismaClient } from '@prisma/client';
+```js
+import { PrismaClient } from "@prisma/client";
 
 let prisma: PrismaClient;
 
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === "production") {
   prisma = new PrismaClient();
 } else {
   if (!global.prisma) {
@@ -233,12 +232,11 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 export default prisma;
-
 ```
 
 Hacemos modificaciones en TS para global
 
-```js 
+```js
 import { PrismaClient } from '@prisma/client';
 
 let prisma: PrismaClient;
@@ -256,39 +254,144 @@ export default prisma;
 
 ```
 
-# Recomendaciones 
+## Generar semilla de base de datos
 
-Cuando alguien probar nuestra app, el va a necesitar tener la db arriba, por ende tenemos que tener preparado cierto pasos antes de llegar a ese punto: 
+La semilla sirve como una copia de la base de datos para poder hacer las pruebas pertinentes, probar la app, insertar datos ficticios sin destruir o sobrecargar la base de datos real.
+En nuestro caso la información semilla de la base de datos seria crear un par de To do.
 
-1. en el gitignore: agregamos la carpeta *postgres*. Esto se debe ya que la carpeta postgres es solo para desarrollo.
+1.  Vamos a crear un endpoint y una vez creado lo vamos a probar en postman: http://localhost:3000/api/seed
+    Para crearlo vamos a ir a nuestra carpeta API, vamos a crear la carpeta SEED y dentro el archivo route.ts.
+    Nota: RAG es el snippet que configuramos para la creación rápida del archivo route.ts
 
-2. Otro punto muy importante que no queremos perder es nuestra lógica de como levantamos nuestro imagen 
+```js
+import { NextResponse, NextRequest } from "next/server";
 
-# Development 
+export async function GET(request: Request) {
+  return NextResponse.json({
+    message: "Seed Executed",
+  });
+}
+```
 
-Pasos para levantar la app en desarrollo 
+2. Ahora tenemos que hacer una inserción a la base de datos. Primero haremos una inserción básica y luego una masiva.
+   Para la básica:
 
-1. Levantar la base de datos 
+- Preparamos la inserción de la base de datos.
+- Utilizamos prisma que hemos creado en la carpeta lib/prisma.
+- Seleccionamos el model para nosotros seria 'todo'.
+- Al hacer punto, nos salen todas los métodos que podemos utilizar sobre 'todo' en este caso buscar crear por ende utilizaremos _create_
+- Especificamos la data que es la información que quiero insertar en un todo.
+  Nota: todas son opcionales excepto la description porque asi lo definimos en nuestro model.
+- agregamos un await para esperar la creación y lo guardamos en una constante.
+
+```js
+import prisma from "@/lib/prisma";
+import { NextResponse, NextRequest } from "next/server";
+
+export async function GET(request: Request) {
+  const todo = await prisma.todo.create({
+    data: {
+      description: "Piedra del alma",
+    },
+  });
+  console.log("🚀 ~ GET ~ todo:", todo);
+
+  return NextResponse.json({
+    message: "Seed Executed",
+  });
+}
+```
+
+Para ver el todo creado, tenemos que ejecutar en postman => http://localhost:3000/api/seed
+Y en la terminal del visual no sale estos datos:
+![Terminal en visual](https://res.cloudinary.com/dtbfspso5/image/upload/v1730218243/Captura_de_pantalla_2024-10-29_131004_cmdpyx.png)
+
+También podemos ver el elemento creado en TablePlus:
+![TablePlus](https://res.cloudinary.com/dtbfspso5/image/upload/v1730218354/Captura_de_pantalla_2024-10-29_131157_hopdh6.png)
+
+- La IDEA usualmente del SEED es que purge la base de datos y la deje de manera tal que pueda trabajar tranquilo en ella sin que me vaya duplicando la data. Para ello vamos agregar la siguiente linea de código en nuestro route.ts
+
+```js
+await prisma.todo.deleteMany(); // delete * from todo
+```
+
+Tambien podemos especificar que elementos queremos borrar:
+
+```js
+await prisma.todo.deleteMany({
+  where: {
+    complete: false,
+  },
+}); // delete from todo where complete = false
+```
+
+Para la masiva:
+
+- Primero borramos la anterior tabla que teniamos:
+
+```js
+await prisma.todo.deleteMany(); // delete * from todo
+```
+
+- Preparamos la inserción de la base de datos.
+- Utilizamos _prisma_ que hemos creado en la carpeta lib/prisma.
+- Seleccionamos el model para nosotros seria 'todo'.
+- Al hacer punto, nos salen todas los métodos que podemos utilizar sobre 'todo' en este caso buscar crear de manera masiva por ende utilizaremos _createMany_
+- Especificamos la data a diferencia de la forma básica que la información que quiero insertar era un todo, aquí tenemos que insertar un arreglo con todos:
+
+```js
+// insert masivo
+await prisma.todo.createMany({
+  data: [
+    { description: "Piedra del alma", complete: true },
+    { description: "Piedra del poder" },
+    { description: "Piedra del tiempo" },
+    { description: "Piedra del espacio" },
+    { description: "Piedra del realidad" },
+  ],
+});
+```
+Nota: todas son opcionales excepto la description porque asi lo definimos en nuestro model.
+
+- agregamos un await para esperar la creación.
+- Ejecutamos en postman el endpoint y volvemos al tablePlus: En este caso nos creo todo el arreglo con los distintos todo individuales 
+
+  ![TablePlus](https://res.cloudinary.com/dtbfspso5/image/upload/v1730219085/Captura_de_pantalla_2024-10-29_132422_swlknh.png)
+
+NOTA: cada vez que ejecutemos el seed en postman vamos a perder los id porque nos genera nuevos uuid().
+
+
+
+# Recomendaciones
+
+Cuando alguien probar nuestra app, el va a necesitar tener la db arriba, por ende tenemos que tener preparado cierto pasos antes de llegar a ese punto:
+
+1. en el gitignore: agregamos la carpeta _postgres_. Esto se debe ya que la carpeta postgres es solo para desarrollo.
+
+2. Otro punto muy importante que no queremos perder es nuestra lógica de como levantamos nuestro imagen
+
+# Development
+
+Pasos para levantar la app en desarrollo
+
+1. Levantar la base de datos
 
 ```
 docker compose up -d
 ```
 
-2. Renombrar el .env.template a .env 
+2. Renombrar el .env.template a .env
 3. Reemplazar las variables de entorno
+4. Ejecutar el SEED para [crear la base de datos local](http://localhost:3000/api/seed)
 
-
-# Prisma commands 
+# Prisma commands
 
 ```
 npx prisma init
-npx prisma migrate dev 
+npx prisma migrate dev
 npx prisma generate
 ```
 
-
 # Prod
 
-
 # Stage
-
