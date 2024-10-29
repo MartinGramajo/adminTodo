@@ -525,6 +525,138 @@ export async function GET(request: Request) {
 }
 ```
 
+### Retornar una única entrada
+
+Una vez terminada la pagination y listado todos los todos. Nuestro siguiente objetivo es poder listar solamente una unica entrada, un único todo para ello vamos a utilizar el id de cada entrada o todo.
+Por ende apuntaremos al siguiente endpoint con el id del todo que queremos traer: http://localhost:3000/api/todos/774572da-b7a7-4fc9-8d1f-4f30efdcbaf1
+
+Para ello :
+
+1. Tenemos que crear un nuevo directorio que reciba de manera dinámica el id de cada todo:
+   Nos vamos API/TODOS/[ID]/route.js
+
+NOTA: el nombre que ponemos entre [] puede ser cualquiera, en este caso utilizamos "id", pero es con el nombre con el cual lo vamos a obtener, es decir, el nombre de la variable que tenemos que apuntar.
+
+```js
+import { NextResponse, NextRequest } from "next/server";
+
+export async function GET(request: Request) {
+  return NextResponse.json({
+    message: "get solamente uno",
+  });
+}
+```
+
+Para verificar que funciona nos iremos a POSTMAN y haremos la consulta al endpoint: http://localhost:3000/api/todos/774572da-b7a7-4fc9-8d1f-4f30efdcbaf1 y si todo marcha correcto tenemos que ver el msj que dejamos en nuestro archivo.
+
+![Postman](https://res.cloudinary.com/dtbfspso5/image/upload/v1730227530/Captura_de_pantalla_2024-10-29_154435_kkpdvc.png)
+
+2. Una vez corroborado que todo funciona correctamente debemos tomar la url y como lo hacemos? vamos a pasar por parámetro de nuestra function segments:any o arguments:any
+
+```js
+import { NextResponse, NextRequest } from "next/server";
+
+export async function GET(request: Request, segments: any) {
+  return NextResponse.json({
+    message: "get solamente uno",
+  });
+}
+```
+
+y si hacemos un console.log(segments), ejecutamos el endpoint en postman y volvemos a nuestra terminal tendriamos algo como esto:
+
+```js
+{
+  segments: {
+    params: {
+      id: "774572da-b7a7-4fc9-8d1f-4f30efdcbaf1";
+    }
+  }
+}
+```
+
+También podríamos mandar directamente a imprimir en postman los segments:
+
+```js
+import { NextResponse, NextRequest } from "next/server";
+
+export async function GET(request: Request, segments: any) {
+  return NextResponse.json(segments);
+}
+```
+
+![Postman](https://res.cloudinary.com/dtbfspso5/image/upload/v1730227864/Captura_de_pantalla_2024-10-29_155048_xytmpr.png)
+
+> [IMPORTANTE]
+>
+> En el caso de querer aplicar otros queries params en mi petición como por ejemplo: http://localhost:3000/api/todos/774572da-b7a7-4fc9-8d1f-4f30efdcbaf1?skip=10&take=5.
+>
+> NO FUNCIONARIA: esto se debe a que nos estamos tomando esos valores, por ende si quisiéramos que funcione tendríamos que tomarlo en el archivo route.ts.
+
+3. Tarea : Utilizamos el params.id para buscarlo dentro de los todos:
+
+```js
+import prisma from "@/lib/prisma";
+import { NextResponse, NextRequest } from "next/server";
+
+interface Segments {
+  params: {
+    id: string,
+  };
+}
+
+export async function GET(request: Request, { params }: Segments) {
+  // Buscar el todo que coincida con params.id
+  const todo = await prisma.todo.findUnique({
+    where: {
+      id: params.id, // Asegúrate de que 'id' sea el nombre correcto del campo en tu modelo
+    },
+  });
+
+  // Verificar si se encontró el todo
+  if (!todo) {
+    // Si no se encuentra, retornar un mensaje de error
+    return NextResponse.json({ message: "No encontrado" }, { status: 404 });
+  }
+
+  // Si se encuentra, retornar el todo
+  return NextResponse.json(todo);
+}
+```
+
+4. Tarea: solución de clase
+
+```js
+import prisma from "@/lib/prisma";
+import { NextResponse, NextRequest } from "next/server";
+
+interface Segments {
+  params: {
+    id: string,
+  };
+}
+
+export async function GET(request: Request, { params }: Segments) {
+  // tomamos el id de los paramos
+  const { id } = params;
+
+  // buscamos el todo por id
+  const todo = await prisma.todo.findFirst({
+    where: { id },
+  });
+
+  // si no lo encuentra, retornamos un 404
+  if (!todo) {
+    return NextResponse.json(
+      { message: `todo con id ${id} no existe ` },
+      { status: 404 }
+    );
+  }
+
+  return NextResponse.json(todo);
+}
+```
+
 # Recomendaciones
 
 Cuando alguien probar nuestra app, el va a necesitar tener la db arriba, por ende tenemos que tener preparado cierto pasos antes de llegar a ese punto:
