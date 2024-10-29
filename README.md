@@ -389,14 +389,141 @@ export async function GET(request: Request) {
   return NextResponse.json(todos);
 }
 ```
-5. Probamos en postman el endpoint y si todo sale correctamente podemos visualizar los 5 todo que tenemos: 
 
-  ![Postman](https://res.cloudinary.com/dtbfspso5/image/upload/v1730219946/Captura_de_pantalla_2024-10-29_133845_yy4wq7.png)
+5. Probamos en postman el endpoint y si todo sale correctamente podemos visualizar los 5 todo que tenemos:
+
+![Postman](https://res.cloudinary.com/dtbfspso5/image/upload/v1730219946/Captura_de_pantalla_2024-10-29_133845_yy4wq7.png)
+
+## Pagination simple
+
+Para la paginacion vamos a seguir los pasos que nos provee [Documentación Prisma](https://www.prisma.io/docs/orm/prisma-client/queries/pagination).
+
+Básicamente seria tomar del findMany(), por un lado, el skip y por otro, el take.
+
+#### Como obtengo esos queries params?
+
+Mediante los pasos que nos recomienda la documentación de next => [Route Handlers](https://nextjs.org/docs/app/building-your-application/routing/route-handlers).
+
+Pasos:
+
+1. Definir como vamos a tomar los valores (skip y take)
+2. Para tomar un query params tenemos que utilizar las siguientes linea de código. En este caso de la request toma el searchParams y luego lo usa para traer el 'take' y en caso de no encontrarlo que tome por defecto los 10 primeros.
+
+```js
+const { searchParams } = new URL(request.url);
+const take = searchParams.get("take") ?? "10";
+```
+
+la idea radica en poder hacer una consulta al siguiente endpoint: http://localhost:3000/api/todos?take=2
+
+3. Utilizamos el take en el findMany pero agregandole el simbolo + para transformarlo en numero porque take espera un numero:
+
+```js
+const todos = await prisma.todo.findMany({
+  take: +take,
+});
+```
+
+Sin embargo nos tenemos que asegurar antes de enviar el take de que efectivamente pueda ser un numero y por esta razón agregamos la siguiente verificación :
+
+```js
+import prisma from "@/lib/prisma";
+import { NextResponse, NextRequest } from "next/server";
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const take = searchParams.get("take") ?? "10";
+
+  if (isNaN(+take)) {
+    return NextResponse.json(
+      { message: "take tiene que ser un numero" },
+      { status: 400 }
+    );
+  }
+
+  const todos = await prisma.todo.findMany({
+    take: +take,
+  });
+
+  return NextResponse.json(todos);
+}
+```
+
+4. Probamos el endpoint en postman y si todo esta correcto nos tiene que traer los 2 primeros:
+
+![Postman](https://res.cloudinary.com/dtbfspso5/image/upload/v1730224132/Captura_de_pantalla_2024-10-29_133845_yud0u2.png)
+
+5. Ahora vamos a tomar el skip, para ellos vamos a hacer el mismo procedimiento con la verificación de que skip tiene que ser un numero:
+
+```js
+import prisma from '@/lib/prisma'
+import { NextResponse, NextRequest } from 'next/server'
+
+export async function GET(request: Request) {
+
+   const {searchParams} = new URL(request.url);
+   const take = searchParams.get('take') ?? '10';
+   const skip = searchParams.get('skip') ?? '0';
 
 
+   if( isNaN(+take)){
+    return NextResponse.json({ message: 'take tiene que ser un numero'}, {status:400})
+   }
 
+   if( isNaN(+skip)){
+    return NextResponse.json({ message: 'skip tiene que ser un numero'}, {status:400})
+   }
 
+  const todos = await prisma.todo.findMany({
+    take: +take,
+    skip: +skip,
 
+  });
+
+  return NextResponse.json(todos);
+
+```
+
+la idea radica en poder hacer una consulta al siguiente endpoint: http://localhost:3000/api/todos?take=2&skip=2
+Si todo sale correcto nos tiene que mostrar la consulta 2 todo, uno con la piedra del espacio y otro con la piedra del tiempo:
+
+![Postman](https://res.cloudinary.com/dtbfspso5/image/upload/v1730224554/Captura_de_pantalla_2024-10-29_145417_m9zrju.png)
+
+### Evitar hacer la conversion con + en muchas lineas de código:
+
+Podemos simplificar nuestro código de la siguiente manera: Podemos utilizar el + o la palabra number para especificar la conversion. Esto lo hacemos con la finalidad de que nuestro código quede mas legible. Siempre debemos apuntar a la legibilidad.
+
+```js
+import prisma from "@/lib/prisma";
+import { NextResponse, NextRequest } from "next/server";
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const take = +(searchParams.get("take") ?? "10");
+  const skip = Number(searchParams.get("skip") ?? "0");
+
+  if (isNaN(take)) {
+    return NextResponse.json(
+      { message: "take tiene que ser un numero" },
+      { status: 400 }
+    );
+  }
+
+  if (isNaN(skip)) {
+    return NextResponse.json(
+      { message: "skip tiene que ser un numero" },
+      { status: 400 }
+    );
+  }
+
+  const todos = await prisma.todo.findMany({
+    take,
+    skip,
+  });
+
+  return NextResponse.json(todos);
+}
+```
 
 # Recomendaciones
 
