@@ -351,14 +351,50 @@ await prisma.todo.createMany({
   ],
 });
 ```
+
 Nota: todas son opcionales excepto la description porque asi lo definimos en nuestro model.
 
 - agregamos un await para esperar la creación.
-- Ejecutamos en postman el endpoint y volvemos al tablePlus: En este caso nos creo todo el arreglo con los distintos todo individuales 
+- Ejecutamos en postman el endpoint y volvemos al tablePlus: En este caso nos creo todo el arreglo con los distintos todo individuales
 
   ![TablePlus](https://res.cloudinary.com/dtbfspso5/image/upload/v1730219085/Captura_de_pantalla_2024-10-29_132422_swlknh.png)
 
 NOTA: cada vez que ejecutemos el seed en postman vamos a perder los id porque nos genera nuevos uuid().
+
+## Lista todas las entradas
+
+En este caso queremos crear un nuevo endpoint: http://localhost:3000/api/todos para poder listar todos los todo creados.
+
+1. Creamos dentro de la carpeta API, la carpeta todo y dentro de ella el archivo route.ts.
+2. utilizamos el snippet rag para hacer la creación del archivo.
+3. En este caso para traer todos los elementos utiliza el método _findMany()_
+
+```js
+import prisma from "@/lib/prisma";
+import { NextResponse, NextRequest } from "next/server";
+
+export async function GET(request: Request) {
+  const todos = await prisma.todo.findMany({});
+}
+```
+
+4. Ahora retornamos los todos
+
+```js
+import prisma from "@/lib/prisma";
+import { NextResponse, NextRequest } from "next/server";
+
+export async function GET(request: Request) {
+  const todos = await prisma.todo.findMany();
+  return NextResponse.json(todos);
+}
+```
+5. Probamos en postman el endpoint y si todo sale correctamente podemos visualizar los 5 todo que tenemos: 
+
+  ![Postman](https://res.cloudinary.com/dtbfspso5/image/upload/v1730219946/Captura_de_pantalla_2024-10-29_133845_yy4wq7.png)
+
+
+
 
 
 
