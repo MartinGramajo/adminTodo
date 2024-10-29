@@ -135,7 +135,128 @@ services:
 ![This is an alt text.](https://res.cloudinary.com/dtbfspso5/image/upload/v1730170374/Captura_de_pantalla_2024-10-28_235242_l5tk3c.png "This is a sample image.")
 
 
-## Recomendaciones 
+## Prisma + NextJs
+
+Prisma se usa para facilitar la interacción con bases de datos SQL y no-SQL y se integra perfectamente en aplicaciones Next.js, permitiéndote definir y manipular modelos de datos de forma eficiente.
+
+> [IMPORTANTE]
+>
+> Nos permite modelar o tener objects *evitando tener que hacer queries* como seleccionar tabla, insertar en tabla etc.
+>
+
+[Prisma Documentación](https://www.prisma.io/docs/orm/overview/introduction/what-is-prisma)
+
+[Vercel Documentación: Para crear el prisma client (para trabajar con nuestro object, modelos que vamos a crear)](https://vercel.com/guides/nextjs-prisma-postgres)
+
+
+## Conectar Prisma con Next
+
+* En la terminal vamos a ejecutar el siguiente comando: 
+```
+ npx prisma init
+```
+
+* Este comando nos crear el archivo .env con el database_url. En la cual tenemos que editar con nuestros datos.
+
+* Ejecutado el comando en la terminal nos da una serie de pasos: 
+1. En el archivo .env tenemos que establecer el DATABASE_URL o la variable de entorno de nuestra base.
+2. Establecer el *provider* de *datasource* para establecer un *scheman.prisma* esto nos habilita trabajar con: postgresql, mysql, SQLite, mongodb o cockroach db.  
+3. Ejecutar el comando : npx prisma db pull para convertir una base de datos en prisma.
+4. Ejecutar el comando: npx prisma generate  para generar el PRISMA CLIENT. 
+
+* Por otra parte, creamos un archivo copia del .env con el nombre  .env.template. Este archivo servirá de guía para la gente que se sume al proyecto o que quiera hacer las configuraciones base en caso de clonar nuestro repo. 
+
+* Ahora vamos a trabajar en la carpeta *PRISMA* en el archivo *schema.prisma*: En este archivo vamos a definir los modelos con los cuales vamos a trabajar. 
+NOTA: un MODELO representa una tabla dentro de la base de datos.
+
+```js
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Todo {
+  id          String   @id @default(uuid())
+  description String
+  complete    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+```
+Nota: @default() es para establecer el valor por defecto por ejemplo en la propiedad complete lo establecemos como false.
+
+* Como hicimos una modificación en la base de datos o en nuestra estructura de datos tenemos que ejecutar una migración. Esto se debe que al agregar el model Todo es nuestra primera modificación a la base de datos.
+Para ellos vamos a utilizar el siguiente comando: 
+```
+npx prisma migrate dev 
+```
+Nota: *dev* seria el nombre de nuestra migración. 
+
+> [IMPORTANTE]
+>
+> Este comando crea el proceso de migración, verifica la variables de entorno. Realiza los cambios y procesos necesarios para que nuestra base de datos y nuestro modelo estén en sintonía o en sincronía. Esto para asegurarle a prisma que los cambios que hagamos afectan la base de datos.
+>
+> NO OLVIDAR: CADA VEZ QUE HAGAMOS CAMBIOS TENEMOS QUE HACER LAS MIGRACIONES CORRESPONDIENTE.
+
+* Una vez terminado el proceso del comando, nos vamos a tablePlus y apretamos ctrl + R, Si todo lo hicimos correctamente vamos a poder ver lo siguiente:
+![TablePlus.](https://res.cloudinary.com/dtbfspso5/image/upload/v1730173074/Captura_de_pantalla_2024-10-29_003724_sek4c1.png)
+
+
+
+* Por ultimo vamos a ejecutar el comando para generar el CLIENTE DE PRISMA (PRISMA CLIENT) para poder hacer las manipulaciones de la base de datos. 
+```
+npx prisma generate
+```
+
+Importante seguir las recomendaciones que nos da el link de vercel: 
+[Vercel Documentación: Para crear el prisma client (para trabajar con nuestro object, modelos que vamos a crear)](https://vercel.com/guides/nextjs-prisma-postgres)
+
+Tenemos que crear una nueva carpeta dentro de SRC / LIB/ prisma.ts
+
+```js 
+import { PrismaClient } from '@prisma/client';
+
+let prisma: PrismaClient;
+
+if (process.env.NODE_ENV === 'production') {
+  prisma = new PrismaClient();
+} else {
+  if (!global.prisma) {
+    global.prisma = new PrismaClient();
+  }
+  prisma = global.prisma;
+}
+
+export default prisma;
+
+```
+
+Hacemos modificaciones en TS para global
+
+```js 
+import { PrismaClient } from '@prisma/client';
+
+let prisma: PrismaClient;
+
+if (process.env.NODE_ENV === 'production') {
+  prisma = new PrismaClient();
+} else {
+  if (!(global as any).prisma) {
+    (global as any).prisma = new PrismaClient();
+  }
+  prisma = (global as any).prisma;
+}
+
+export default prisma;
+
+```
+
+# Recomendaciones 
 
 Cuando alguien probar nuestra app, el va a necesitar tener la db arriba, por ende tenemos que tener preparado cierto pasos antes de llegar a ese punto: 
 
@@ -153,10 +274,21 @@ Pasos para levantar la app en desarrollo
 docker compose up -d
 ```
 
-2. Ejecutar algún procedimiento para llenar de datos ficticios nuestra base de datos.
+2. Renombrar el .env.template a .env 
+3. Reemplazar las variables de entorno
+
+
+# Prisma commands 
+
+```
+npx prisma init
+npx prisma migrate dev 
+npx prisma generate
+```
 
 
 # Prod
 
 
 # Stage
+
