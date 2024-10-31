@@ -742,11 +742,103 @@ export async function POST(request: Request) {
 }
 ```
 
-## YUP - VALIDATION SCHEMA (esquema de validación) 
+## YUP - VALIDATION SCHEMA (esquema de validación)
 
+Para evitar que cualquier persona tenga la autorización de crear todos con información, ya sea id o fechas o propiedades que no sean correctas. Ya que todo tiene que ser generado por la base de datos y no por el usuario que llama al endpoint.
+Por esa razón vamos a utilizar una librería para aplicar validaciones.
 
+[Link para la instalación de YUP](https://www.npmjs.com/package/yup).
 
+1. Una vez instalado para usarlo haremos lo siguiente:
+   Nota: tenemos dos forma de trabajarlo
 
+Forma 1
+
+```js
+import { object } from "yup";
+const postSchema = object({});
+```
+
+Forma 2 (esta es la utilizada en clase)
+
+```js
+import * as yup from "yup";
+
+const postSchema = yup.object({});
+```
+
+2. Tenemos que definir el object : el cual va a tener el descriptio y el complete
+   NOTA: después del required podemos seguir agregando validaciones como .length(), maxlength(), minlength o email etc.
+   NOTA2: en la propiedad _complete_ podes especificar en la validación que sea OPCIONAL Y agregarle un valor por defecto.
+
+```js
+const postSchema = yup.object({
+  description: yup.string().required(),
+  complete: yup.boolean().optional().default(false),
+});
+```
+
+> [IMPORTANTE]
+>
+> Cualquier valor que no este definido en mi postSchema nos tira un error.
+>
+> Cualquier propiedad que no cumpla con las reglas especificadas, es decir, que description sea un string y que complete sea un boolean nos dará un error server internal.
+
+3. Ahora para validar tenemos que hacer lo siguiente:
+
+```js
+const postSchema =yup.object({
+  description: yup.string().required(),
+  complete: yup.boolean().optional().default(false), // ! TODO  mostrar algo interesante.
+})
+
+export async function POST(request: Request) {
+  const body = await postSchema.validate(await request.json());
+  const todo = await prisma.todo.create(
+    {data: body}
+  )
+```
+
+Nota: si dejamos el cursor encima de la const Body vamos a ver que trae :
+
+```js
+const body: {
+    description: string;
+    complete: boolean;
+}
+
+```
+
+4. Pero como el schema de validación puede fallar y nos tira una exception, lo tenemos que manejar con el bloque try/catch:
+
+```js
+export async function POST(request: Request) {
+  try {
+    const body = await postSchema.validate(await request.json());
+    const todo = await prisma.todo.create({ data: body });
+    return NextResponse.json(todo);
+  } catch (error) {
+    return NextResponse.json(error, { status: 400 });
+  }
+}
+```
+
+5. Pero dejarlo de esa forma si enviamos por ejemplo una nueva propiedad que no este contemplada dentro del model todo nos tira una error.
+   Para evitar que eso pase y como sabemos que propiedades vamos a utilizar lo que haremos sera enfocar la solución desde otro punto de vista utilizando el desestructurar:
+
+```js
+export async function POST(request: Request) {
+  try {
+    const { complete, description } = await postSchema.validate(
+      await request.json()
+    );
+    const todo = await prisma.todo.create({ data: { complete, description } });
+    return NextResponse.json(todo);
+  } catch (error) {
+    return NextResponse.json({ message: error }, { status: 400 });
+  }
+}
+```
 
 # Recomendaciones
 
