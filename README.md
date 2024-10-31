@@ -657,6 +657,97 @@ export async function GET(request: Request, { params }: Segments) {
 }
 ```
 
+### POST - Crear una nueva entrada
+
+1. Vamos a trabajar en la carpeta api/todos/route.ts
+2. Creamos una consulta con el snippet rag abajo de la consulta que teníamos para traer todo el listado
+
+```js
+import prisma from "@/lib/prisma";
+import { NextResponse, NextRequest } from "next/server";
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const take = +(searchParams.get("take") ?? "10");
+  const skip = Number(searchParams.get("skip") ?? "0");
+
+  if (isNaN(take)) {
+    return NextResponse.json(
+      { message: "take tiene que ser un numero" },
+      { status: 400 }
+    );
+  }
+
+  if (isNaN(skip)) {
+    return NextResponse.json(
+      { message: "skip tiene que ser un numero" },
+      { status: 400 }
+    );
+  }
+
+  const todos = await prisma.todo.findMany({
+    take: take,
+    skip: skip,
+  });
+
+  return NextResponse.json(todos);
+}
+
+export async function POST(request: Request) {
+  return NextResponse.json({
+    message: "Hello POST",
+  });
+}
+```
+
+3. Ejecutamos la petición al endpoint http://localhost:3000/api/todos pero con el método POST y si todo sale correcto vamos a poder leer el msj hello post:
+
+![Postman](https://res.cloudinary.com/dtbfspso5/image/upload/v1730227864/Captura_de_pantalla_2024-10-29_155048_xytmpr.png)
+
+4. Creamos una const para recibir el body que es lo que vamos a recibir de una petición POST, PUT Y DELETE.
+
+```js
+export async function POST(request: Request) {
+  const body = await request.json();
+
+  return NextResponse.json(body);
+}
+```
+
+Nota: pero esta forma nos tira un error dado que estamos enviando nada.
+Por ello tenemos que ir a postman/BODY/ RAW y enviar el siguiente objeto:
+![Postman](https://res.cloudinary.com/dtbfspso5/image/upload/v1730337295/Captura_de_pantalla_2024-10-30_221322_kvf11m.png)
+
+5. Dado nuestro modelo de todo, lo que tendríamos que enviar en la petición POST seria lo siguiente:
+
+```js
+{
+    "description":"Conquistar el mundo",
+    "complete": true
+}
+
+```
+
+![Postman](https://res.cloudinary.com/dtbfspso5/image/upload/v1730337591/Captura_de_pantalla_2024-10-30_221938_mwtyjx.png)
+
+6. Por ende, lo que tenemos que enviar a prisma seria el body y este seria capaz de insertarlo:
+
+```js
+export async function POST(request: Request) {
+  const body = await request.json();
+
+  const todo = await prisma.todo.create({ data: body });
+
+  return NextResponse.json(todo);
+}
+```
+
+## YUP - VALIDATION SCHEMA (esquema de validación) 
+
+
+
+
+
 # Recomendaciones
 
 Cuando alguien probar nuestra app, el va a necesitar tener la db arriba, por ende tenemos que tener preparado cierto pasos antes de llegar a ese punto:
