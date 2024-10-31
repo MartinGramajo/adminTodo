@@ -152,7 +152,7 @@ Prisma se usa para facilitar la interacción con bases de datos SQL y no-SQL y s
  npx prisma init
 ```
 
-- Este comando nos crear el archivo .env con el database_url. En la cual tenemos que editar con nuestros datos.
+- Este comando nos crear el archivo .env con el database_url. En la cual tenemos que editar con nuestros datos. Tenemos que modificar el usuario, password, puerto y la db.
 
 - Ejecutado el comando en la terminal nos da una serie de pasos:
 
@@ -161,7 +161,7 @@ Prisma se usa para facilitar la interacción con bases de datos SQL y no-SQL y s
 3. Ejecutar el comando : npx prisma db pull para convertir una base de datos en prisma.
 4. Ejecutar el comando: npx prisma generate para generar el PRISMA CLIENT.
 
-- Por otra parte, creamos un archivo copia del .env con el nombre .env.template. Este archivo servirá de guía para la gente que se sume al proyecto o que quiera hacer las configuraciones base en caso de clonar nuestro repo.
+- Por otra parte, creamos un archivo copia del .env con el nombre .env.template. Este archivo servirá de guía para los compañeros que se sume al proyecto o que quiera hacer las configuraciones base en caso de clonar nuestro repo.
 
 - Ahora vamos a trabajar en la carpeta _PRISMA_ en el archivo _schema.prisma_: En este archivo vamos a definir los modelos con los cuales vamos a trabajar.
   NOTA: un MODELO representa una tabla dentro de la base de datos.
@@ -195,7 +195,7 @@ Nota: @default() es para establecer el valor por defecto por ejemplo en la propi
 npx prisma migrate dev
 ```
 
-Nota: _dev_ seria el nombre de nuestra migración.
+Nota: _dev_ seria el nombre de nuestra migración, podemos ponerle cualquier nombre.
 
 > [IMPORTANTE]
 >
@@ -234,7 +234,7 @@ if (process.env.NODE_ENV === "production") {
 export default prisma;
 ```
 
-Hacemos modificaciones en TS para global
+Hacemos modificaciones en el archivo en la propiedad global especificando su tipado en este caso any:
 
 ```js
 import { PrismaClient } from '@prisma/client';
@@ -303,7 +303,7 @@ export async function GET(request: Request) {
 ```
 
 Para ver el todo creado, tenemos que ejecutar en postman => http://localhost:3000/api/seed
-Y en la terminal del visual no sale estos datos:
+Y en la terminal del visual nos salen estos datos:
 ![Terminal en visual](https://res.cloudinary.com/dtbfspso5/image/upload/v1730218243/Captura_de_pantalla_2024-10-29_131004_cmdpyx.png)
 
 También podemos ver el elemento creado en TablePlus:
@@ -836,6 +836,171 @@ export async function POST(request: Request) {
     return NextResponse.json(todo);
   } catch (error) {
     return NextResponse.json({ message: error }, { status: 400 });
+  }
+}
+```
+
+## Actualizar entradas PUT
+
+Vamos a actualizar el siguiente elemento de nuestros _todos_:
+![alt text](image-1.png)
+
+1. Trabajamos sobre la carpeta todos/[id]/route.ts vamos a crear el PUT
+2. Creamos la petición: como es igual a petición para obtener una entrada por id vamos a utilizar toda la lógica, lo único que cambia es el método y el actualizar el elemento
+
+```js
+export async function PUT(request: Request, { params }: Segments) {
+  // tomamos el id de los paramos
+  const { id } = params;
+
+  // buscamos el todo por id
+  const todo = await prisma.todo.findFirst({
+    where: { id },
+  });
+
+  // si no lo encuentra, retornamos un 404
+  if (!todo) {
+    return NextResponse.json(
+      { message: `todo con id ${id} no existe ` },
+      { status: 404 }
+    );
+  }
+
+  // ACTUALIZAR TODO
+
+  // como espera un body lo tenemos que traer.
+  const body = await request.json();
+
+  const updatedTodo = await prisma.todo.update({
+    where: { id },
+    data: { ...body },
+  });
+
+  return NextResponse.json(updatedTodo);
+}
+```
+
+## Validaciones en la actualización
+
+Estas validaciones las realizamos para evitar que se envíen datos erróneos, propiedades que no existen en el model o lo que espera en la db o fechas erróneas.
+
+1. En el método PUT vamos a a extraer del body las propiedades COMPLETE Y DESCRIPTION. Ademas le agregamos el rest en donde van a estar contenida el resto de las propiedades que no utilizamos pero la traemos por si la llegáramos a utilizar en algún momento.
+
+```js
+// ACTUALIZAR TODO
+const { complete, description, ...rest } = await request.json();
+
+const updatedTodo = await prisma.todo.update({
+  where: { id },
+  data: { complete, description },
+});
+```
+
+Nota: con esta validation lo que evitamos es que si el usuario envía una nueva propiedad que no esta contemplada en lo que espera recibir la base no se rompa o tire algún error.
+
+2. Trabajamos con un schema de validation para la actualización del todo:
+
+```js
+// Agregamos el schema de validation
+const putSchema = yup.object({
+  complete: yup.boolean().optional(),
+  description: yup.string().optional(),
+});
+
+// ACTUALIZAR TODO - utilizando la validation
+const { complete, description, ...rest } = await putSchema.validate(
+  await request.json()
+);
+const updatedTodo = await prisma.todo.update({
+  where: { id },
+  data: { complete, description },
+});
+```
+
+3. Ahora tenemos que evitar las mutación o cambios de datos por ejemplo: en la propiedad complete solo debe esperar un valor boolean, no debe recibir otro tipo de dato sino eso nos rompería nuestra base de datos. Para ello agregaremos un bloque try/catch:
+
+```js
+try {
+  // ACTUALIZAR TODO
+  const { complete, description, ...rest } = await putSchema.validate(
+    await request.json()
+  );
+  const updatedTodo = await prisma.todo.update({
+    where: { id },
+    data: { complete, description },
+  });
+
+  return NextResponse.json(updatedTodo);
+} catch (error) {
+  return NextResponse.json(error, { status: 400 });
+}
+```
+
+### Extra: simplificar código
+
+Dado que en tanto en la petición GET para traer una sola entrada como en el PUT que acabamos de crear tenemos código duplicado para obtener el id, buscar el match y tirar un msj en caso de no encontrarlo:
+
+```js
+const getTodo = async (id: string): Promise<Todo | null> => {
+  // Función: buscamos el todo por id y lo retornamos:
+  const todo = await prisma.todo.findFirst({
+    where: { id },
+  });
+
+  return todo;
+};
+```
+
+Ahora la utilizamos en GET:
+
+```js
+export async function GET(request: Request, { params }: Segments) {
+  // buscamos el todo por id
+  const todo = await getTodo(params.id);
+
+  // si no lo encuentra, retornamos un 404
+  if (!todo) {
+    return NextResponse.json(
+      { message: `todo con id ${params.id} no existe ` },
+      { status: 404 }
+    );
+  }
+
+  return NextResponse.json(todo);
+}
+```
+
+Lo utilizamos en PUT:
+
+```js
+export async function PUT(request: Request, { params }: Segments) {
+  // tomamos el id de los paramos
+  // const { id } = params;
+
+  // buscamos el todo por id
+  const todo = await getTodo(params.id);
+
+  // si no lo encuentra, retornamos un 404
+  if (!todo) {
+    return NextResponse.json(
+      { message: `todo con id ${params.id} no existe ` },
+      { status: 404 }
+    );
+  }
+
+  try {
+    // ACTUALIZAR TODO
+    const { complete, description, ...rest } = await putSchema.validate(
+      await request.json()
+    );
+    const updatedTodo = await prisma.todo.update({
+      where: { id: params.id },
+      data: { complete, description },
+    });
+
+    return NextResponse.json(updatedTodo);
+  } catch (error) {
+    return NextResponse.json(error, { status: 400 });
   }
 }
 ```
